@@ -1,0 +1,8 @@
+{
+    "log_file_path" : "log/test_log.txt",
+    "report_output" : true,
+    "detailed_output" : false,
+    "max_num_iterations" : 1000,
+    "gradient_tolerance" : 0.00001,
+    "function_tolerance" : 0.00001
+}
