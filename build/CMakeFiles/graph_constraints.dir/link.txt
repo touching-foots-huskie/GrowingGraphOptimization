@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC -g -Wall  -shared -Wl,-soname,libgraph_constraints.so -o libgraph_constraints.so CMakeFiles/graph_constraints.dir/src/graph_constraints.cpp.o 
