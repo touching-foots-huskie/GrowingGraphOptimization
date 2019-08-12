@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/graph_constraints.hpp
+ceres/ceres.h
+-
+ceres/autodiff_cost_function.h
+-
+ceres/rotation.h
+-
+Eigen/Eigen
+-
+
+/home/harvey/CppProjects/GrowingGraphOptimization/src/graph_constraints.cpp
+graph_constraints.hpp
+/home/harvey/CppProjects/GrowingGraphOptimization/src/graph_constraints.hpp
+

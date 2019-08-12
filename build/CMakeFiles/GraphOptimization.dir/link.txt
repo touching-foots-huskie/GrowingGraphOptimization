@@ -1,0 +1,1 @@
+/usr/bin/c++  -g -Wall  -rdynamic CMakeFiles/GraphOptimization.dir/src/main.cpp.o  -o GraphOptimization -Wl,-rpath,/usr/local/lib:/home/harvey/CppProjects/GrowingGraphOptimization/build /usr/local/lib/libceres.so.2.0.0 libgraph_optimizer.so libgraph_constraints.so /usr/local/lib/libglog.so.0.4.0 /usr/local/lib/libgflags.so.2.2.2 /usr/local/lib/libgflags.so.2.2.2 -lpthread 

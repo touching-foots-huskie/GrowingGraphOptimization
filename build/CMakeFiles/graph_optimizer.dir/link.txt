@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -g -Wall  -shared -Wl,-soname,libgraph_optimizer.so -o libgraph_optimizer.so CMakeFiles/graph_optimizer.dir/src/graph_optimizer.cpp.o 
