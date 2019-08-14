@@ -114,7 +114,7 @@ void GraphOptimizer::AddVertexQuat(int outside_id, int local_param_type,
 };
 
 void GraphOptimizer::UpdateVertex(int outside_id, const Eigen::Ref<Eigen::MatrixXd>& update_value){
-    int inside_id = outside2inside_[outside_id];
+    int inside_id = outside2inside_.at(outside_id);
     for(int i = 0; i < dim_; i++) {
         vertex_values_[inside_id * dim_ + i] = update_value(i, 0);
     }
@@ -122,7 +122,7 @@ void GraphOptimizer::UpdateVertex(int outside_id, const Eigen::Ref<Eigen::Matrix
 };
 
 void GraphOptimizer::UpdateVertexQuat(int outside_id, const Eigen::Ref<Eigen::MatrixXd>& update_value){
-    int inside_id = outside2inside_[outside_id];
+    int inside_id = outside2inside_.at(outside_id);
     Matrix2Quaternion(update_value, &vertex_values_[inside_id * dim_]);
 };
 
@@ -131,7 +131,7 @@ void GraphOptimizer::AddUniEdge(int outside_id_1, int outside_id_2,
                              ceres::CostFunction* cost_function_edge,
                              ceres::LossFunction* lost_function_edge){
 
-    int inside_id_1 = outside2inside_[outside_id_1];
+    int inside_id_1 = outside2inside_.at(outside_id_1);
 
     problem_.AddResidualBlock(cost_function_edge, lost_function_edge, 
                               &vertex_values_[inside_id_1 * dim_]);
@@ -142,8 +142,8 @@ void GraphOptimizer::AddDualEdge(int outside_id_1, int outside_id_2,
                              ceres::CostFunction* cost_function_edge,
                              ceres::LossFunction* lost_function_edge){
 
-    int inside_id_1 = outside2inside_[outside_id_1];
-    int inside_id_2 = outside2inside_[outside_id_2];
+    int inside_id_1 = outside2inside_.at(outside_id_1);
+    int inside_id_2 = outside2inside_.at(outside_id_2);
 
     problem_.AddResidualBlock(cost_function_edge, lost_function_edge, 
                               &vertex_values_[inside_id_1 * dim_],
@@ -173,13 +173,13 @@ void GraphOptimizer::ResultOutput(Eigen::Ref<Eigen::MatrixXd> vertex_values, std
 
     outside_ids.clear();
     for(int i = 0; i < current_num_of_vertex_; i++){
-        outside_ids.push_back(inside2outside_[i]);
+        outside_ids.push_back(inside2outside_.at(i));
     }
 };
 
 void GraphOptimizer::ResultOutput(std::map<int, Eigen::MatrixXd>& output_values) {
     for(int i = 0; i < current_num_of_vertex_; i++) {
-        int outside_id = inside2outside_[i];
+        int outside_id = inside2outside_.at(i);
         Eigen::MatrixXd output_matrix = Eigen::MatrixXd::Zero(4, 4);
         Quaternion2Matrix(&vertex_values_[i * dim_], output_matrix);
         output_values[outside_id] = output_matrix;
