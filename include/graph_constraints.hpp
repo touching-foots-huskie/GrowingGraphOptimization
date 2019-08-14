@@ -446,7 +446,8 @@ ceres::CostFunction* UniPlane2PlaneCost(const double* object_pose_1,
                                         const double* center_1,
                                         const double* normal_2,
                                         const double* center_2,
-                                        double weight);
+                                        double weight_1,
+                                        double weight_2);
 
 // Plane2Surf
 ceres::CostFunction* DualPlane2SurfCost(const double* normal_1, 
