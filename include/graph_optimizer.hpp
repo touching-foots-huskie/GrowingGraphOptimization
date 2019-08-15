@@ -22,7 +22,8 @@ public:
         dim_ = 0;
         current_num_of_vertex_ = 0;
 
-        options_.linear_solver_type = ceres::DENSE_NORMAL_CHOLESKY;
+        //options_.linear_solver_type = ceres::DENSE_NORMAL_CHOLESKY;
+        options_.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
         options_.minimizer_progress_to_stdout = (bool) this->optim_config_["detailed_output"];
         /*
         options.gradient_tolerance = 0.01 * Sophus::Constants<double>::epsilon();
@@ -68,7 +69,7 @@ public:
     bool Optimization();
 
     // log
-    void Log();
+    void Log(std::map<std::pair<int, int>, std::vector<double> >& residual_by_pair);
 
     void ResultOutput(Eigen::Ref<Eigen::MatrixXd> vertex_values, std::vector<int>& outside_ids);
     void ResultOutput(std::map<int, Eigen::MatrixXd>& output_values);
@@ -90,6 +91,8 @@ private:
 
     std::map<int, int> outside2inside_;  // outside id to inside id
     std::map<int, int> inside2outside_;
+    // Log structure
+    std::map<std::pair<int, int>, ceres::CostFunction* > cost_function_by_pair_;
 
     ceres::Problem problem_;
     ceres::Solver::Options options_;

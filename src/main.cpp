@@ -92,5 +92,15 @@ int main () {
     std::cout << "------ Result in 2nd stage ------" << std::endl;
     std::cout << optimized_relative_pose << std::endl;                                                            
 
+    // log check
+    std::map<std::pair<int, int>, std::vector<double> > residual_by_pair;
+    graph_optimizer.Log(residual_by_pair);
+    for(auto it = residual_by_pair.begin(); it != residual_by_pair.end(); ++it) {
+        std::cout << it->first.first << " , " << it->first.second << std::endl;
+        for(auto residual : it->second) {
+            std::cout << residual << ", ";
+        }
+        std::cout << std::endl;
+    }
     return 0;
 }

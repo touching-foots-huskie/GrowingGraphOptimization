@@ -132,6 +132,8 @@ void GraphOptimizer::AddUniEdge(int outside_id_1, int outside_id_2,
                              ceres::LossFunction* lost_function_edge){
 
     int inside_id_1 = outside2inside_.at(outside_id_1);
+    cost_function_by_pair_[std::pair<int, int>(outside_id_1, outside_id_2)]
+        =   cost_function_edge;
 
     problem_.AddResidualBlock(cost_function_edge, lost_function_edge, 
                               &vertex_values_[inside_id_1 * dim_]);
@@ -144,6 +146,8 @@ void GraphOptimizer::AddDualEdge(int outside_id_1, int outside_id_2,
 
     int inside_id_1 = outside2inside_.at(outside_id_1);
     int inside_id_2 = outside2inside_.at(outside_id_2);
+    cost_function_by_pair_[std::pair<int, int>(outside_id_1, outside_id_2)]
+        =   cost_function_edge;
 
     problem_.AddResidualBlock(cost_function_edge, lost_function_edge, 
                               &vertex_values_[inside_id_1 * dim_],
@@ -160,6 +164,48 @@ bool GraphOptimizer::Optimization(){
     return true;
 };
 
+/*
+Log is giving a detailed output of costs
+ */
+void GraphOptimizer::Log(std::map<std::pair<int, int>, std::vector<double> >& residual_by_pair) {
+    for(auto it = cost_function_by_pair_.begin(); it != cost_function_by_pair_.end(); ++it) {
+        if(it->first.second == -1) {
+            // an uniedge
+            int inside_id_1 = outside2inside_.at(it->first.first);
+            // get params
+            double* params[1];
+            params[0] = &vertex_values_[inside_id_1 * dim_];
+            // get residual
+            int num_of_residual = it->second->num_residuals();
+            double* residual =  new double[num_of_residual];
+            it->second->Evaluate(params, residual, nullptr);
+            std::vector<double> result_by_cost_function;
+            for(int i = 0; i < num_of_residual; i++) {
+                result_by_cost_function.emplace_back(residual[i]);
+            }
+            delete[] residual;  // clear meomery
+            residual_by_pair[it->first] = result_by_cost_function;
+        }
+        else {
+            // a dual edge
+            int inside_id_1 = outside2inside_.at(it->first.first);
+            int inside_id_2 = outside2inside_.at(it->first.second);
+            double* params[2];
+            params[0] = &vertex_values_[inside_id_1 * dim_];
+            params[1] = &vertex_values_[inside_id_2 * dim_];
+            // get residual
+            int num_of_residual = it->second->num_residuals();
+            double* residual =  new double[num_of_residual];
+            it->second->Evaluate(params, residual, nullptr);
+            std::vector<double> result_by_cost_function;
+            for(int i = 0; i < num_of_residual; i++) {
+                result_by_cost_function.emplace_back(residual[i]);
+            }
+            delete[] residual;  // clear meomery
+            residual_by_pair[it->first] = result_by_cost_function;
+        }
+    }
+};
 /*
 vertex_value | Dim:[D, Num]
  */
