@@ -2,7 +2,7 @@
 
 ceres::CostFunction* DualPoseCost(const double* relative_pose, double weight){
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<DualPoseCostFunctor,
-        7, 7, 7>(new DualPoseCostFunctor(relative_pose, weight));
+        4, 7, 7>(new DualPoseCostFunctor(relative_pose, weight));
     return cost_function;
 };
 
@@ -10,7 +10,7 @@ ceres::CostFunction* UniPoseCost(const double* object_pose_1,
                                  const double* relative_pose, double weight){
 
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<UniPoseCostFunctor,
-        7, 7>(new UniPoseCostFunctor(object_pose_1, relative_pose, weight));
+        4, 7>(new UniPoseCostFunctor(object_pose_1, relative_pose, weight));
     return cost_function;
 };
 

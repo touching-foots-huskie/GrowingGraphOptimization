@@ -39,6 +39,8 @@ int main () {
 
     // relative pose
     // transform into double*
+    double quat_object_pose_1[7];
+    GraphOptimizer::Matrix2Quaternion(object_pose_1, quat_object_pose_1);
     double relative_pose[7];
 
     GraphOptimizer::Matrix2Quaternion(relative_pose_1to2, relative_pose);
@@ -48,8 +50,8 @@ int main () {
     }
     std::cout << std::endl;
 
-    ceres::CostFunction* dual_pose_cost = DualPoseCost(relative_pose, 1.0);
-    graph_optimizer.AddDualEdge(1, 2, dual_pose_cost, new ceres::TrivialLoss());
+    ceres::CostFunction* dual_pose_cost = UniPoseCost(quat_object_pose_1, relative_pose, 1.0);
+    graph_optimizer.AddUniEdge(2, 1, dual_pose_cost, new ceres::TrivialLoss());
     graph_optimizer.Optimization();
 
     // Output Result
@@ -93,6 +95,7 @@ int main () {
     std::cout << optimized_relative_pose << std::endl;                                                            
 
     // log check
+    /*
     std::map<std::pair<int, int>, std::vector<double> > residual_by_pair;
     graph_optimizer.Log(residual_by_pair);
     for(auto it = residual_by_pair.begin(); it != residual_by_pair.end(); ++it) {
@@ -102,5 +105,7 @@ int main () {
         }
         std::cout << std::endl;
     }
+     */
+    
     return 0;
 }
