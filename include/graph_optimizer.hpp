@@ -25,13 +25,9 @@ public:
         //options_.linear_solver_type = ceres::DENSE_NORMAL_CHOLESKY;
         options_.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
         options_.minimizer_progress_to_stdout = (bool) this->optim_config_["detailed_output"];
-        /*
-        options.gradient_tolerance = 0.01 * Sophus::Constants<double>::epsilon();
-        options.function_tolerance = 0.01 * Sophus::Constants<double>::epsilon();
-        */
-        options_.gradient_tolerance = 1e-5;
-        options_.function_tolerance = 1e-5;
-        options_.max_num_iterations = 1000;
+        options_.gradient_tolerance = (double) optim_config_["gradient_tolerance"];
+        options_.function_tolerance = (double) optim_config_["function_tolerance"];
+        options_.max_num_iterations = (int) optim_config_["max_num_iterations"];
 
     };
 
