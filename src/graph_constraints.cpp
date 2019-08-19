@@ -102,12 +102,10 @@ ceres::CostFunction* UniPlane2PlaneCost(const double* object_pose_1,
 ceres::CostFunction* DualPlane2SurfCost(const double* relative_pose_1, 
                                         const double* relative_pose_2,
                                         double distance,
-                                        double weight_1,
-                                        double weight_2,
-                                        double weight_3) {
+                                        double weight_1) {
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<DualPlane2SurfFunctorV2,
         2, 7, 7>(new DualPlane2SurfFunctorV2(
-                 relative_pose_1, relative_pose_2, distance, weight_1, weight_2, weight_3));
+                 relative_pose_1, relative_pose_2, distance, weight_1));
     return cost_function;
 };
 
@@ -115,12 +113,10 @@ ceres::CostFunction* UniPlane2SurfCost(const double* object_pose_1,
                                        const double* relative_pose_1, 
                                        const double* relative_pose_2,
                                        double distance,
-                                       double weight_1,
-                                       double weight_2,
-                                       double weight_3) {
+                                       double weight_1) {
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<UniPlane2SurfFunctorV2,
         2, 7>(new UniPlane2SurfFunctorV2(
                 object_pose_1,
-                relative_pose_1, relative_pose_2, distance, weight_1, weight_2, weight_3));
+                relative_pose_1, relative_pose_2, distance, weight_1));
     return cost_function;
 };

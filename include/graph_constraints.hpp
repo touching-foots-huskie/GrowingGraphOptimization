@@ -601,23 +601,17 @@ struct DualPlane2SurfFunctorV2 {
     DualPlane2SurfFunctorV2(const double* relative_pose_1, 
                             const double* relative_pose_2,
                             double distance,
-                            double weight_1,
-                            double weight_2,
-                            double weight_3) : 
+                            double weight_1) : 
                         relative_pose_1_(relative_pose_1),
                         relative_pose_2_(relative_pose_2),
                         distance_(distance),
-                        weight_r_1_(weight_1),
-                        weight_r_2_(weight_2),
-                        weight_t_(weight_3)
+                        weight_t_(weight_1)
     {};
 
     template <typename T> 
     bool operator() (const T* object_pose_1, const T* object_pose_2, T* residual) const {
         // Standard transform
         // n1.dot(n2) = 0, (c1 - c2).dot(n1) = 0
-        T casted_weight_r_1 = (T) weight_r_1_;
-        T casted_weight_r_2 = (T) weight_r_2_;
         T casted_weight_t = (T) weight_t_;
 
         // cast pose 
@@ -656,8 +650,6 @@ private:
     const double* relative_pose_1_;
     const double* relative_pose_2_;
     double distance_;
-    double weight_r_1_;
-    double weight_r_2_;
     double weight_t_;
 };
 
@@ -666,16 +658,12 @@ struct UniPlane2SurfFunctorV2 {
                            const double* relative_pose_1, 
                            const double* relative_pose_2,
                            double distance,
-                           double weight_1,
-                           double weight_2,
-                           double weight_3) : 
+                           double weight_1) : 
                         object_pose_1_(object_pose_1),
                         relative_pose_1_(relative_pose_1),
                         relative_pose_2_(relative_pose_2),
                         distance_(distance),
-                        weight_r_1_(weight_1),
-                        weight_r_2_(weight_2),
-                        weight_t_(weight_3)
+                        weight_t_(weight_1)
     {};
 
     template <typename T> 
@@ -686,8 +674,6 @@ struct UniPlane2SurfFunctorV2 {
         }
         // Standard transform
         // n1.dot(n2) = 0, (c1 - c2).dot(n1) = 0
-        T casted_weight_r_1 = (T) weight_r_1_;
-        T casted_weight_r_2 = (T) weight_r_2_;
         T casted_weight_t = (T) weight_t_;
 
         // cast pose 
@@ -727,8 +713,6 @@ private:
     const double* relative_pose_1_;
     const double* relative_pose_2_;
     double distance_;
-    double weight_r_1_;
-    double weight_r_2_;
     double weight_t_;
 };
 
@@ -789,17 +773,13 @@ ceres::CostFunction* UniPlane2PlaneCost(const double* object_pose_1,
 ceres::CostFunction* DualPlane2SurfCost(const double* relative_pose_1, 
                                         const double* relative_pose_2,
                                         double distance,
-                                        double weight_1,
-                                        double weight_2,
-                                        double weight_3);
+                                        double weight_1);
 
 ceres::CostFunction* UniPlane2SurfCost(const double* object_pose_1,
                                        const double* relative_pose_1, 
                                        const double* relative_pose_2,
                                        double distance,
-                                       double weight_1,
-                                       double weight_2,
-                                       double weight_3);
+                                       double weight_1);
 
 // currently, we don't have this constraints               
 ceres::CostFunction* UniSurf2PlaneCost();
