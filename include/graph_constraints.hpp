@@ -54,8 +54,8 @@ void RelPoseParse(const T* object_pose_1, const T* object_pose_2,
     QuatPoseCompose(object_pose_2, relative_pose_2, global_pose_2);
 
     T r_global_pose_2[7];
-    // Inverse quaternion : (Rotation z-axis for pi)
-    T rotate180[7] = {(T) M_PI, (T) 1.0, (T) 0.0, (T) 0.0, (T) 0.0, (T) 0.0, (T) 0.0};
+    // Inverse quaternion : (Rotation z-axis for pi from x-axis)
+    T rotate180[7] = {(T) 0.0, (T) 1.0, (T) 0.0, (T) 0.0, (T) 0.0, (T) 0.0, (T) 0.0};
     // rotate rotation2
     QuatPoseCompose(global_pose_2, rotate180, r_global_pose_2);
     // get relative rotation between the two transform
@@ -525,10 +525,10 @@ struct DualPlane2PlaneFunctorV2 {
                      relative_pose_2in1);
 
         // rotation error : rotation axis should be [0, 0, 1]
-        residual[0] = casted_weight_r *(relative_pose_2in1[1] * relative_pose_2in1[1] 
-                                        + relative_pose_2in1[2] * relative_pose_2in1[2]);
+        residual[0] = casted_weight_r * relative_pose_2in1[1];
+        residual[1] = casted_weight_r * relative_pose_2in1[2];
         // transition error
-        residual[1] = casted_weight_t * relative_pose_2in1[6];
+        residual[2] = casted_weight_t * relative_pose_2in1[6];
         
         return true;
     };
@@ -581,10 +581,10 @@ struct UniPlane2PlaneFunctorV2 {
                      relative_pose_2in1);
 
         // rotation error : rotation axis should be [0, 0, 1]
-        residual[0] = casted_weight_r *(relative_pose_2in1[1] * relative_pose_2in1[1] 
-                                        + relative_pose_2in1[2] * relative_pose_2in1[2]);
+        residual[0] = casted_weight_r * relative_pose_2in1[1];
+        residual[1] = casted_weight_r * relative_pose_2in1[2];
         // transition error
-        residual[1] = casted_weight_t * relative_pose_2in1[6];
+        residual[2] = casted_weight_t * relative_pose_2in1[6];
         
         return true;
     };
@@ -634,12 +634,20 @@ struct DualPlane2SurfFunctorV2 {
                      relative_pose_1, relative_pose_2,
                      relative_pose_2in1);
 
-        // rotation error : rotation axis should be [PI / 2.0, *, *, 0]
-        residual[0] = casted_weight_r_1 * (relative_pose_2in1[0] * relative_pose_2in1[0]
-                                        - (T) ((M_PI * M_PI) / 4.0));
-        residual[1] = casted_weight_r_2 * relative_pose_2in1[3];
-        // transition error
-        residual[2] = casted_weight_t * (relative_pose_2in1[6] - (T) distance_);
+        // Two points should be at [0, 0, distance] : points1 & points2
+        T boundary_points_1[3] = {(T) 0.0, (T) 0.0, (T) 1.0};
+        T boundary_points_2[3] = {(T) 0.0, (T) 0.0, (T) -1.0};
+
+        // rotate points
+        T estimated_points_1[3];
+        T estimated_points_2[3];
+        ceres::QuaternionRotatePoint(relative_pose_2in1, boundary_points_1, estimated_points_1);
+        ceres::QuaternionRotatePoint(relative_pose_2in1, boundary_points_2, estimated_points_2);
+
+        // z axis
+        T estimated_z = - relative_pose_2in1[6] + (T) distance_;
+        residual[0] = casted_weight_t * (estimated_points_1[2] - estimated_z);
+        residual[1] = casted_weight_t * (estimated_points_2[2] - estimated_z);
         
         return true;
     };
@@ -696,13 +704,21 @@ struct UniPlane2SurfFunctorV2 {
                      relative_pose_1, relative_pose_2,
                      relative_pose_2in1);
 
-        // rotation error : rotation axis should be [PI / 2.0, *, *, 0]
-        residual[0] = casted_weight_r_1 * (relative_pose_2in1[0] * relative_pose_2in1[0]
-                                        - (T) ((M_PI * M_PI) / 4.0));
-        residual[1] = casted_weight_r_2 * relative_pose_2in1[3];
-        // transition error
-        residual[2] = casted_weight_t * (relative_pose_2in1[6] - (T) distance_);
-        
+        // Two points should be at [0, 0, distance] : points1 & points2
+        T boundary_points_1[3] = {(T) 0.0, (T) 0.0, (T) 1.0};
+        T boundary_points_2[3] = {(T) 0.0, (T) 0.0, (T) -1.0};
+
+        // rotate points
+        T estimated_points_1[3];
+        T estimated_points_2[3];
+        ceres::QuaternionRotatePoint(relative_pose_2in1, boundary_points_1, estimated_points_1);
+        ceres::QuaternionRotatePoint(relative_pose_2in1, boundary_points_2, estimated_points_2);
+
+        // z axis
+        T estimated_z = - relative_pose_2in1[6] + (T) distance_;
+        residual[0] = casted_weight_t * (estimated_points_1[2] - estimated_z);
+        residual[1] = casted_weight_t * (estimated_points_2[2] - estimated_z);
+
         return true;
     };
 

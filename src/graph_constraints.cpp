@@ -82,7 +82,7 @@ ceres::CostFunction* DualPlane2PlaneCost(const double* relative_pose_1,
                                          double weight_1,
                                          double weight_2) {
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<DualPlane2PlaneFunctorV2,
-        2, 7, 7>(new DualPlane2PlaneFunctorV2(
+        3, 7, 7>(new DualPlane2PlaneFunctorV2(
                  relative_pose_1, relative_pose_2, weight_1, weight_2));
     return cost_function;
 };
@@ -93,7 +93,7 @@ ceres::CostFunction* UniPlane2PlaneCost(const double* object_pose_1,
                                         double weight_1,
                                         double weight_2) {
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<UniPlane2PlaneFunctorV2,
-        2, 7>(new UniPlane2PlaneFunctorV2(
+        3, 7>(new UniPlane2PlaneFunctorV2(
                  object_pose_1,
                  relative_pose_1, relative_pose_2, weight_1, weight_2));
     return cost_function;

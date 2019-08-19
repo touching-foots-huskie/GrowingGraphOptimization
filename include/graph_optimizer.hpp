@@ -32,7 +32,9 @@ public:
     };
 
     ~GraphOptimizer(){
-        delete vertex_values_;
+        if(current_num_of_vertex_ != 0) {
+            delete[] vertex_values_;
+        }
     }
     // data input & output (Remove is disabled due to ceres)
     // Set Num must be done before vertex adding
