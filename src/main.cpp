@@ -1,5 +1,6 @@
 #include "graph_optimizer.hpp"
 #include "graph_constraints.hpp"
+#include "util_tools.hpp"
 // configuration process
 #define CONFIGURU_IMPLEMENTATION 1
 #include "configuru.hpp"
@@ -106,6 +107,14 @@ int main () {
         std::cout << std::endl;
     }
      */
+    // test measure average
+    std::vector<Eigen::MatrixXd> object_poses;
+    Eigen::MatrixXd result_pose;
+    object_poses.emplace_back(object_pose_1);
+    object_poses.emplace_back(object_pose_2);
+    GetAveragePose(object_poses, result_pose);
+    std::cout << "------ Result in 3rd stage ------" << std::endl;
+    std::cout << result_pose << std::endl;
     
     return 0;
 }
