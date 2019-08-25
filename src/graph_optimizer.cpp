@@ -84,7 +84,7 @@ void GraphOptimizer::AddVertexQuat(int outside_id, int local_param_type,
         for(int i = 0; i < current_num_of_vertex_ * dim_; i++) {
             new_vertex_values_[i] = vertex_values_[i];
         }
-        delete vertex_values_;
+        delete[] vertex_values_;
         vertex_values_ = new_vertex_values_;
         // expand total vertex value
         Matrix2Quaternion(initial_value, &vertex_values_[current_num_of_vertex_ * dim_]);
