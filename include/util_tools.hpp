@@ -34,6 +34,7 @@ void GetAveragePose(std::vector<Eigen::MatrixXd> pose_measures,
     for(unsigned int i = 0; i < num_of_measures; i++) {
         double* measure_pose = new double[7];
         GraphOptimizer::Matrix2Quaternion(pose_measures[i], measure_pose);
+        poses_for_estimation.emplace_back(measure_pose);
         ceres::CostFunction* measure_cost = UniPoseCost(
             measure_pose, Id, 1.0);
         problem.AddResidualBlock(measure_cost, new ceres::HuberLoss(0.1), average_pose);
@@ -41,6 +42,10 @@ void GetAveragePose(std::vector<Eigen::MatrixXd> pose_measures,
 
     ceres::Solve(options, &problem, &summary);
     GraphOptimizer::Quaternion2Matrix(average_pose, result_pose);
+    // clean
+    for(unsigned int i = 0; i < poses_for_estimation.size(); i++) {
+        delete[] poses_for_estimation[i];
+    }
 };
 
 #endif

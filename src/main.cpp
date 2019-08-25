@@ -109,7 +109,7 @@ int main () {
      */
     // test measure average
     std::vector<Eigen::MatrixXd> object_poses;
-    Eigen::MatrixXd result_pose;
+    Eigen::MatrixXd result_pose(4, 4);
     object_poses.emplace_back(object_pose_1);
     object_poses.emplace_back(object_pose_2);
     GetAveragePose(object_poses, result_pose);
