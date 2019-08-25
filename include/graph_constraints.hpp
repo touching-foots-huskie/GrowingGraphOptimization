@@ -654,6 +654,7 @@ private:
 };
 
 struct UniPlane2SurfFunctorV2 {
+    // Fix plane
     UniPlane2SurfFunctorV2(const double* object_pose_1,
                            const double* relative_pose_1, 
                            const double* relative_pose_2,
@@ -710,6 +711,70 @@ struct UniPlane2SurfFunctorV2 {
 
 private:
     const double* object_pose_1_;
+    const double* relative_pose_1_;
+    const double* relative_pose_2_;
+    double distance_;
+    double weight_t_;
+};
+
+struct UniSurf2PlaneFunctorV2 {
+    // Fix surf
+    UniSurf2PlaneFunctorV2(const double* object_pose_1,
+                           const double* relative_pose_1, 
+                           const double* relative_pose_2,
+                           double distance,
+                           double weight_1) : 
+                        object_pose_2_(object_pose_1),
+                        relative_pose_1_(relative_pose_2),
+                        relative_pose_2_(relative_pose_1),
+                        distance_(distance),
+                        weight_t_(weight_1)
+    {};
+
+    template <typename T> 
+    bool operator() (const T* object_pose_1, T* residual) const {
+        T object_pose_2[7];
+        for(int i = 0; i < 7; i++) {
+            object_pose_2[i] = (T) object_pose_2_[i];
+        }
+        // Standard transform
+        // n1.dot(n2) = 0, (c1 - c2).dot(n1) = 0
+        T casted_weight_t = (T) weight_t_;
+
+        // cast pose 
+        T relative_pose_1[7];
+        T relative_pose_2[7];
+        for(int i = 0; i < 7; i++) {
+            relative_pose_1[i] = (T) relative_pose_1_[i];
+            relative_pose_2[i] = (T) relative_pose_2_[i];
+        }
+
+        T relative_pose_2in1[7];
+        // get relative rotation & position
+        RelPoseParse(object_pose_1, object_pose_2, 
+                     relative_pose_1, relative_pose_2,
+                     relative_pose_2in1);
+
+        // Two points should be at [0, 0, distance] : points1 & points2
+        T boundary_points_1[3] = {(T) 0.0, (T) 0.0, (T) 1.0};
+        T boundary_points_2[3] = {(T) 0.0, (T) 0.0, (T) -1.0};
+
+        // rotate points
+        T estimated_points_1[3];
+        T estimated_points_2[3];
+        ceres::QuaternionRotatePoint(relative_pose_2in1, boundary_points_1, estimated_points_1);
+        ceres::QuaternionRotatePoint(relative_pose_2in1, boundary_points_2, estimated_points_2);
+
+        // z axis
+        T estimated_z = - relative_pose_2in1[6] + (T) distance_;
+        residual[0] = casted_weight_t * (estimated_points_1[2] - estimated_z);
+        residual[1] = casted_weight_t * (estimated_points_2[2] - estimated_z);
+
+        return true;
+    };
+
+private:
+    const double* object_pose_2_;
     const double* relative_pose_1_;
     const double* relative_pose_2_;
     double distance_;
@@ -776,6 +841,13 @@ ceres::CostFunction* DualPlane2SurfCost(const double* relative_pose_1,
                                         double weight_1);
 
 ceres::CostFunction* UniPlane2SurfCost(const double* object_pose_1,
+                                       const double* relative_pose_1, 
+                                       const double* relative_pose_2,
+                                       double distance,
+                                       double weight_1);
+
+
+ceres::CostFunction* UniSurf2PlaneCost(const double* object_pose_1,
                                        const double* relative_pose_1, 
                                        const double* relative_pose_2,
                                        double distance,

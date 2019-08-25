@@ -114,8 +114,23 @@ ceres::CostFunction* UniPlane2SurfCost(const double* object_pose_1,
                                        const double* relative_pose_2,
                                        double distance,
                                        double weight_1) {
+    // Fix Plane
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<UniPlane2SurfFunctorV2,
         2, 7>(new UniPlane2SurfFunctorV2(
+                object_pose_1,
+                relative_pose_1, relative_pose_2, distance, weight_1));
+    return cost_function;
+};
+
+
+ceres::CostFunction* UniSurf2PlaneCost(const double* object_pose_1,
+                                       const double* relative_pose_1, 
+                                       const double* relative_pose_2,
+                                       double distance,
+                                       double weight_1) {
+    // Fix Surf
+    ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<UniSurf2PlaneFunctorV2,
+        2, 7>(new UniSurf2PlaneFunctorV2(
                 object_pose_1,
                 relative_pose_1, relative_pose_2, distance, weight_1));
     return cost_function;
