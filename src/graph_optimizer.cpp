@@ -164,6 +164,51 @@ bool GraphOptimizer::Optimization(){
     return true;
 };
 
+bool GraphOptimizer::CovarianceEstimation(std::map<int, Eigen::MatrixXd>& covariances) {
+    // config
+    ceres::Covariance::Options cov_option;
+    ceres::Covariance covariance(cov_option);
+    std::vector<std::pair<const double*, const double*> > covariance_blocks;
+
+    // add covariance:
+    for(int i = 0; i < current_num_of_vertex_; i++) {
+        covariance_blocks.emplace_back(
+            std::make_pair(
+                &vertex_values_[dim_ * i],
+                &vertex_values_[dim_ * i]
+            )
+        );
+    }
+
+    // Compute
+    if(covariance.Compute(covariance_blocks, &problem_)) {
+        // Log
+        for(int i = 0; i < current_num_of_vertex_; i++) {
+            double covaraince_xx[dim_ * dim_];
+            covariance.GetCovarianceBlock(
+                &vertex_values_[dim_ * i],
+                &vertex_values_[dim_ * i],
+                covaraince_xx
+            );
+            
+            // log
+            Eigen::MatrixXd eigen_covariance(dim_, dim_);
+            for(int j = 0; j < dim_; j++) {
+                for(int k = 0; k < dim_; k++) {
+                    eigen_covariance(j, k) = 
+                    covaraince_xx[dim_ * j + k]; 
+                }
+            }
+            covariances[inside2outside_.at(i)] = eigen_covariance;
+        }
+        return true;
+    }
+    else {
+        std::cout << "Covariance Ill" << std::endl;
+        return false;
+    }
+};
+
 /*
 Log is giving a detailed output of costs
  */

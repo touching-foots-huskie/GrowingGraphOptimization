@@ -31,7 +31,7 @@ void GetAveragePose(std::vector<Eigen::MatrixXd> pose_measures,
     // Add residuals
     double Id[7] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     std::vector<double* > poses_for_estimation;
-    for(unsigned int i = 0; i < num_of_measures; i++) {
+    for(int i = 0; i < num_of_measures; i++) {
         double* measure_pose = new double[7];
         GraphOptimizer::Matrix2Quaternion(pose_measures[i], measure_pose);
         poses_for_estimation.emplace_back(measure_pose);

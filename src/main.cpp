@@ -95,6 +95,14 @@ int main () {
     std::cout << "------ Result in 2nd stage ------" << std::endl;
     std::cout << optimized_relative_pose << std::endl;                                                            
 
+    //
+    // Test Estimation
+    std::map<int, Eigen::MatrixXd> out_covariance;
+    if(graph_optimizer.CovarianceEstimation(out_covariance)) {
+        std::cout << "---- Covariance -------" << std::endl;
+        std::cout << out_covariance[2] << std::endl;
+    }
+    
     // log check
     /*
     std::map<std::pair<int, int>, std::vector<double> > residual_by_pair;

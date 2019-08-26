@@ -65,6 +65,8 @@ public:
 
     // computation 
     bool Optimization();
+    // Covariance Estimation
+    bool CovarianceEstimation(std::map<int, Eigen::MatrixXd>& covariances);
 
     // log
     void Log(std::map<std::pair<int, int>, std::vector<double> >& residual_by_pair);
@@ -95,7 +97,6 @@ private:
     ceres::Problem problem_;
     ceres::Solver::Options options_;
     ceres::Solver::Summary summary_;
-
 };
 
 #endif
