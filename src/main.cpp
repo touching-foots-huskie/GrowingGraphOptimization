@@ -51,7 +51,7 @@ int main () {
     }
     std::cout << std::endl;
 
-    ceres::CostFunction* dual_pose_cost = UniPoseCost(quat_object_pose_1, relative_pose, 1.0);
+    ceres::CostFunction* dual_pose_cost = UniSymmetricCost(quat_object_pose_1, relative_pose, 1.0);
     graph_optimizer.AddUniEdge(2, 1, dual_pose_cost, new ceres::TrivialLoss());
     graph_optimizer.Optimization();
 
@@ -98,7 +98,8 @@ int main () {
     //
     // Test Estimation
     std::map<int, Eigen::MatrixXd> out_covariance;
-    if(graph_optimizer.CovarianceEstimation(out_covariance)) {
+    std::vector<int> target_ids = {1};
+    if(graph_optimizer.CovarianceEstimation(target_ids, out_covariance)) {
         std::cout << "---- Covariance -------" << std::endl;
         std::cout << out_covariance[2] << std::endl;
     }

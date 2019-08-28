@@ -66,7 +66,8 @@ public:
     // computation 
     bool Optimization();
     // Covariance Estimation
-    bool CovarianceEstimation(std::map<int, Eigen::MatrixXd>& covariances);
+    bool CovarianceEstimation(std::vector<int>& target_ids,
+                              std::map<int, Eigen::MatrixXd>& covariances);
 
     // log
     void Log(std::map<std::pair<int, int>, std::vector<double> >& residual_by_pair);

@@ -164,18 +164,22 @@ bool GraphOptimizer::Optimization(){
     return true;
 };
 
-bool GraphOptimizer::CovarianceEstimation(std::map<int, Eigen::MatrixXd>& covariances) {
+bool GraphOptimizer::CovarianceEstimation(std::vector<int>& target_ids,
+                                          std::map<int, Eigen::MatrixXd>& covariances) {
     // config
     ceres::Covariance::Options cov_option;
+    cov_option.null_space_rank = -1;
+    cov_option.algorithm_type = ceres::DENSE_SVD;
     ceres::Covariance covariance(cov_option);
     std::vector<std::pair<const double*, const double*> > covariance_blocks;
 
     // add covariance:
-    for(int i = 0; i < current_num_of_vertex_; i++) {
+    for(unsigned int i = 0; i < target_ids.size(); i++) {
+        int index = outside2inside_.at(target_ids[i]);
         covariance_blocks.emplace_back(
             std::make_pair(
-                &vertex_values_[dim_ * i],
-                &vertex_values_[dim_ * i]
+                &vertex_values_[dim_ * index],
+                &vertex_values_[dim_ * index]
             )
         );
     }
@@ -183,11 +187,12 @@ bool GraphOptimizer::CovarianceEstimation(std::map<int, Eigen::MatrixXd>& covari
     // Compute
     if(covariance.Compute(covariance_blocks, &problem_)) {
         // Log
-        for(int i = 0; i < current_num_of_vertex_; i++) {
+        for(unsigned int i = 0; i < target_ids.size(); i++) {
+            int index = outside2inside_.at(target_ids[i]);
             double covaraince_xx[dim_ * dim_];
             covariance.GetCovarianceBlock(
-                &vertex_values_[dim_ * i],
-                &vertex_values_[dim_ * i],
+                &vertex_values_[dim_ * index],
+                &vertex_values_[dim_ * index],
                 covaraince_xx
             );
             
@@ -199,7 +204,7 @@ bool GraphOptimizer::CovarianceEstimation(std::map<int, Eigen::MatrixXd>& covari
                     covaraince_xx[dim_ * j + k]; 
                 }
             }
-            covariances[inside2outside_.at(i)] = eigen_covariance;
+            covariances[target_ids[i]] = eigen_covariance;
         }
         return true;
     }

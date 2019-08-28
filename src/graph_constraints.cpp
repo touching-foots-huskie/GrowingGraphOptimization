@@ -14,6 +14,21 @@ ceres::CostFunction* UniPoseCost(const double* object_pose_1,
     return cost_function;
 };
 
+// Symmetric Pose
+ceres::CostFunction* DualSymmetricCost(const double* relative_pose, double weight){
+    ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<DualSymmetricCostFunctor,
+        5, 7, 7>(new DualSymmetricCostFunctor(relative_pose, weight));
+    return cost_function;
+};
+
+ceres::CostFunction* UniSymmetricCost(const double* object_pose_1,
+                                      const double* relative_pose, double weight){
+
+    ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<UniSymmetricCostFunctor,
+        5, 7>(new UniSymmetricCostFunctor(object_pose_1, relative_pose, weight));
+    return cost_function;
+};
+
 // Geometry Relationship
 ceres::CostFunction* DualPlane2PlaneCost(const double* normal_1, 
                                          const double* center_1,
