@@ -82,6 +82,12 @@ public:
     static void Matrix2Quaternion(const Eigen::Ref<Eigen::MatrixXd>& matrix,
                            double* quaternion_pose); 
 
+    static void PoseDistance(const Eigen::Ref<Eigen::MatrixXd>& pose_1,
+                             const Eigen::Ref<Eigen::MatrixXd>& pose_2,
+                             const Eigen::Ref<Eigen::MatrixXd>& inner_transform,
+                             std::vector<double>& distance_vector,
+                             int symmetric_axis);
+
 private:
     int dim_;
     int current_num_of_vertex_;
@@ -99,13 +105,5 @@ private:
     ceres::Solver::Options options_;
     ceres::Solver::Summary summary_;
 };
-
-// Pose Distance Tool in 6d space
-// Box distance & Cylinder Distance
-void PoseDistance(const Eigen::Ref<Eigen::MatrixXd>& pose_1,
-                  const Eigen::Ref<Eigen::MatrixXd>& pose_2,
-                  const Eigen::Ref<Eigen::MatrixXd>& inner_transform,
-                  std::vector<double>& distance_vector,
-                  int symmetric_axis);
 
 #endif

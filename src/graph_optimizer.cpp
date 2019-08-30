@@ -325,11 +325,11 @@ void GraphOptimizer::Matrix2Quaternion(const Eigen::Ref<Eigen::MatrixXd>& matrix
     }
 };
 
-void PoseDistance(const Eigen::Ref<Eigen::MatrixXd>& pose_1,
-                  const Eigen::Ref<Eigen::MatrixXd>& pose_2,
-                  const Eigen::Ref<Eigen::MatrixXd>& inner_transform,
-                  std::vector<double>& distance_vector,
-                  int symmetric_axis) {
+void GraphOptimizer::PoseDistance(const Eigen::Ref<Eigen::MatrixXd>& pose_1,
+                                  const Eigen::Ref<Eigen::MatrixXd>& pose_2,
+                                  const Eigen::Ref<Eigen::MatrixXd>& inner_transform,
+                                  std::vector<double>& distance_vector,
+                                  int symmetric_axis) {
     Eigen::MatrixXd relative_pose = pose_1.inverse() * pose_2;
     Eigen::MatrixXd transformed_rel_pose = 
         inner_transform.inverse() * relative_pose * inner_transform;
