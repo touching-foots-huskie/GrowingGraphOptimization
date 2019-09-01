@@ -212,6 +212,85 @@ private:
     double weight_;
 };
 
+struct UniPoseCost2Functor {
+    /*
+    In UniPoseCost the 1st pose is fixed
+    relative_pose | Dim [7], (w, xr, yr, zr, xt, yt, zt)
+     */
+    
+    UniPoseCost2Functor(const double* object_pose_2, 
+                       const double* relative_pose, double weight)
+    {
+        weight_ = weight;
+        object_pose_2_ = object_pose_2;
+        relative_quaternion_ = relative_pose;
+        relative_transition_ = (const double *) &relative_pose[4];
+
+    };
+
+    template <typename T> 
+    bool operator() (const T* object_pose_1, T* residual) const {
+        /*
+        In quaternion, we should have:
+        q1 * qr = q2 : rotation residual
+        q1 * pr * q1-1  + p1 = p2
+        q1 * pr * q1-1 = (p2 - p1) : transition residual
+         */
+        // cast to T
+        T object_pose_2[7];
+
+        for(int i = 0; i < 7; i++) {
+            object_pose_2[i] = (T) object_pose_2_[i];
+        }
+
+        T relative_quaternion[4];
+        T relative_transition[3];
+        T casted_weight = (T) weight_;
+
+        for(int i = 0; i < 4; i++) {
+            relative_quaternion[i] = (T) relative_quaternion_[i];
+        }
+        
+        for(int i = 0; i < 3; i++) {
+            relative_transition[i] = (T) relative_transition_[i];
+        }
+
+        T estimated_rotation_2[4];
+        ceres::QuaternionProduct(object_pose_1, relative_quaternion, estimated_rotation_2);
+
+        // rotation error
+        T rotation_error = (estimated_rotation_2[0] * object_pose_2[0] + 
+                            estimated_rotation_2[1] * object_pose_2[1] + 
+                            estimated_rotation_2[2] * object_pose_2[2] + 
+                            estimated_rotation_2[3] * object_pose_2[3]);
+                            
+        // rotation error should be 1 or -1
+        if(rotation_error > (T) 0.0) {
+            residual[0] = casted_weight * (rotation_error - (T) 1.0);
+        }
+        else {
+            residual[0] = casted_weight * (rotation_error + (T) 1.0);
+        }
+
+        T estimated_transition_2[3];
+        ceres::QuaternionRotatePoint(object_pose_1, relative_transition, 
+                                     estimated_transition_2);
+
+        // transition residual
+        for(int i = 0; i < 3; i++) {
+            residual[1 + i] = (estimated_transition_2[i] - (object_pose_2[i + 4] - 
+                object_pose_1[i + 4])) * casted_weight;
+        }
+        return true;  
+    };
+
+private:
+    const double* object_pose_2_;
+    const double* relative_quaternion_;
+    const double* relative_transition_;
+    double weight_;
+};
+
 // Symmetric Pose Functor
 struct DualSymmetricCostFunctor {
     /*
@@ -1029,6 +1108,8 @@ private:
 // Parameterization : Dim [7]
 ceres::CostFunction* DualPoseCost(const double* relative_pose, double weight);
 ceres::CostFunction* UniPoseCost(const double* object_pose_1,
+                                 const double* relative_pose, double weight);
+ceres::CostFunction* UniPoseCost2(const double* object_pose_1,
                                  const double* relative_pose, double weight);
 ceres::CostFunction* DualSymmetricCost(const double* relative_pose, double weight);
 ceres::CostFunction* UniSymmetricCost(const double* object_pose_1,
