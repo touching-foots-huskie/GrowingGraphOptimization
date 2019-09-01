@@ -282,6 +282,7 @@ void GraphOptimizer::ResultOutput(std::map<int, Eigen::MatrixXd>& output_values)
     }
 };
 
+// Tools for Quaternion
 void GraphOptimizer::Quaternion2Matrix(const double* quaternion_pose, 
                                        Eigen::Ref<Eigen::MatrixXd> matrix) {
     double vectored_matrix[9];
@@ -321,5 +322,40 @@ void GraphOptimizer::Matrix2Quaternion(const Eigen::Ref<Eigen::MatrixXd>& matrix
     // transition part
     for(int i = 0; i < 3; i++) {
         quaternion_pose[4 + i] = matrix(i, 3);
+    }
+};
+
+void GraphOptimizer::PoseDistance(const Eigen::Ref<Eigen::MatrixXd>& pose_1,
+                                  const Eigen::Ref<Eigen::MatrixXd>& pose_2,
+                                  const Eigen::Ref<Eigen::MatrixXd>& inner_transform,
+                                  std::vector<double>& distance_vector,
+                                  int symmetric_axis) {
+    Eigen::MatrixXd relative_pose = pose_1.inverse() * pose_2;
+    Eigen::MatrixXd transformed_rel_pose = 
+        inner_transform.inverse() * relative_pose * inner_transform;
+    // Transform into quaternion
+    double rel_pose[7];
+    GraphOptimizer::Matrix2Quaternion(relative_pose, rel_pose);
+    if(symmetric_axis % 10 == 1) {
+        // symmetric in z-axis
+        distance_vector[0] = std::abs(rel_pose[1]) + std::abs(rel_pose[2]);
+        distance_vector[1] = rel_pose[4];
+        distance_vector[2] = rel_pose[5];
+        distance_vector[3] = rel_pose[6];
+    }
+    else {
+        if(rel_pose[0] > 0) {
+            distance_vector[0] = std::abs(
+                rel_pose[0] - 1.0
+            );
+        }
+        else {
+            distance_vector[0] = std::abs(
+                rel_pose[0] + 1.0
+            );
+        }
+        distance_vector[1] = rel_pose[4];
+        distance_vector[2] = rel_pose[5];
+        distance_vector[3] = rel_pose[6];
     }
 };

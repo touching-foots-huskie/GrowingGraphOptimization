@@ -1110,5 +1110,4 @@ ceres::CostFunction* DualSurf2SurfCost();
 
 // currently, we don't have this constraints 
 ceres::CostFunction* UniSurf2SurfCost();
-
 #endif
