@@ -1,47 +1,47 @@
 #include "graph_constraints.hpp"
 
-ceres::CostFunction* DualPoseCost(const double* relative_pose, double weight){
+ceres::CostFunction* DualPoseCost(const double* relative_pose, double weight_1, double weight_2){
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<DualPoseCostFunctor,
-        4, 7, 7>(new DualPoseCostFunctor(relative_pose, weight));
+        4, 7, 7>(new DualPoseCostFunctor(relative_pose, weight_1, weight_2));
     return cost_function;
 };
 
 ceres::CostFunction* UniPoseCost(const double* object_pose_1,
-                                 const double* relative_pose, double weight){
+                                 const double* relative_pose, double weight_1, double weight_2){
 
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<UniPoseCostFunctor,
-        4, 7>(new UniPoseCostFunctor(object_pose_1, relative_pose, weight));
+        4, 7>(new UniPoseCostFunctor(object_pose_1, relative_pose, weight_1, weight_2));
     return cost_function;
 };
 
 ceres::CostFunction* UniPoseCost2(const double* object_pose_2,
-                                 const double* relative_pose, double weight){
+                                 const double* relative_pose, double weight_1, double weight_2){
 
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<UniPoseCost2Functor,
-        4, 7>(new UniPoseCost2Functor(object_pose_2, relative_pose, weight));
+        4, 7>(new UniPoseCost2Functor(object_pose_2, relative_pose, weight_1, weight_2));
     return cost_function;
 };
 
 // Symmetric Pose
-ceres::CostFunction* DualSymmetricCost(const double* relative_pose, double weight){
+ceres::CostFunction* DualSymmetricCost(const double* relative_pose, double weight_1, double weight_2){
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<DualSymmetricCostFunctor,
-        5, 7, 7>(new DualSymmetricCostFunctor(relative_pose, weight));
+        5, 7, 7>(new DualSymmetricCostFunctor(relative_pose, weight_1, weight_2));
     return cost_function;
 };
 
 ceres::CostFunction* UniSymmetricCost(const double* object_pose_1,
-                                      const double* relative_pose, double weight){
+                                      const double* relative_pose, double weight_1, double weight_2){
 
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<UniSymmetricCostFunctor,
-        5, 7>(new UniSymmetricCostFunctor(object_pose_1, relative_pose, weight));
+        5, 7>(new UniSymmetricCostFunctor(object_pose_1, relative_pose, weight_1, weight_2));
     return cost_function;
 };
 
 ceres::CostFunction* UniSymmetricCost2(const double* object_pose_2,
-                                      const double* relative_pose, double weight){
+                                      const double* relative_pose, double weight_1, double weight_2){
 
     ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<UniSymmetricCost2Functor,
-        5, 7>(new UniSymmetricCost2Functor(object_pose_2, relative_pose, weight));
+        5, 7>(new UniSymmetricCost2Functor(object_pose_2, relative_pose, weight_1, weight_2));
     return cost_function;
 };
 

@@ -69,9 +69,10 @@ struct DualPoseCostFunctor {
     residual | Dim 4
      */
     
-    DualPoseCostFunctor(const double* relative_pose, double weight)
+    DualPoseCostFunctor(const double* relative_pose, double weight_1, double weight_2)
     {
-        weight_ = weight;
+        rotation_weight_ = weight_1;
+        transition_weight_ = weight_2;
         relative_quaternion_ = relative_pose;
         relative_transition_ = (const double *) &relative_pose[4];
 
@@ -89,7 +90,8 @@ struct DualPoseCostFunctor {
         // cast to T
         T relative_quaternion[4];
         T relative_transition[3];
-        T casted_weight = (T) weight_;
+        T casted_rotation_weight = (T) rotation_weight_;
+        T casted_transition_weight = (T) transition_weight_;
 
         for(int i = 0; i < 4; i++) {
             relative_quaternion[i] = (T) relative_quaternion_[i];
@@ -109,10 +111,10 @@ struct DualPoseCostFunctor {
                             estimated_rotation_2[3] * object_pose_2[3]);
         // rotation error should be 1 or -1
         if(rotation_error > (T) 0.0) {
-            residual[0] = casted_weight * (rotation_error - (T) 1.0);
+            residual[0] = casted_rotation_weight * (rotation_error - (T) 1.0);
         }
         else {
-            residual[0] = casted_weight * (rotation_error + (T) 1.0);
+            residual[0] = casted_rotation_weight * (rotation_error + (T) 1.0);
         }
 
         T estimated_transition_2[3];
@@ -122,7 +124,7 @@ struct DualPoseCostFunctor {
         // transition residual
         for(int i = 0; i < 3; i++) {
             residual[1 + i] = (estimated_transition_2[i] - (object_pose_2[i + 4] - 
-                object_pose_1[i + 4])) * casted_weight;
+                object_pose_1[i + 4])) * casted_transition_weight;
         }  
         return true;
     };
@@ -130,7 +132,8 @@ struct DualPoseCostFunctor {
 private:
     const double* relative_quaternion_;
     const double* relative_transition_;
-    double weight_;
+    double rotation_weight_;
+    double transition_weight_;
 };
 
 struct UniPoseCostFunctor {
@@ -140,9 +143,10 @@ struct UniPoseCostFunctor {
      */
     
     UniPoseCostFunctor(const double* object_pose_1, 
-                       const double* relative_pose, double weight)
+                       const double* relative_pose, double weight_1, double weight_2)
     {
-        weight_ = weight;
+        rotation_weight_ = weight_1;
+        transition_weight_ = weight_2;
         object_pose_1_ = object_pose_1;
         relative_quaternion_ = relative_pose;
         relative_transition_ = (const double *) &relative_pose[4];
@@ -166,7 +170,8 @@ struct UniPoseCostFunctor {
 
         T relative_quaternion[4];
         T relative_transition[3];
-        T casted_weight = (T) weight_;
+        T casted_rotation_weight = (T) rotation_weight_;
+        T casted_transition_weight = (T) transition_weight_;
 
         for(int i = 0; i < 4; i++) {
             relative_quaternion[i] = (T) relative_quaternion_[i];
@@ -187,10 +192,10 @@ struct UniPoseCostFunctor {
                             
         // rotation error should be 1 or -1
         if(rotation_error > (T) 0.0) {
-            residual[0] = casted_weight * (rotation_error - (T) 1.0);
+            residual[0] = casted_rotation_weight * (rotation_error - (T) 1.0);
         }
         else {
-            residual[0] = casted_weight * (rotation_error + (T) 1.0);
+            residual[0] = casted_rotation_weight * (rotation_error + (T) 1.0);
         }
 
         T estimated_transition_2[3];
@@ -200,7 +205,7 @@ struct UniPoseCostFunctor {
         // transition residual
         for(int i = 0; i < 3; i++) {
             residual[1 + i] = (estimated_transition_2[i] - (object_pose_2[i + 4] - 
-                object_pose_1[i + 4])) * casted_weight;
+                object_pose_1[i + 4])) * casted_transition_weight;
         }
         return true;  
     };
@@ -209,7 +214,8 @@ private:
     const double* object_pose_1_;
     const double* relative_quaternion_;
     const double* relative_transition_;
-    double weight_;
+    double rotation_weight_;
+    double transition_weight_;
 };
 
 struct UniPoseCost2Functor {
@@ -219,9 +225,10 @@ struct UniPoseCost2Functor {
      */
     
     UniPoseCost2Functor(const double* object_pose_2, 
-                       const double* relative_pose, double weight)
+                       const double* relative_pose, double weight_1, double weight_2)
     {
-        weight_ = weight;
+        rotation_weight_ = weight_1;
+        transition_weight_ = weight_2;
         object_pose_2_ = object_pose_2;
         relative_quaternion_ = relative_pose;
         relative_transition_ = (const double *) &relative_pose[4];
@@ -245,7 +252,8 @@ struct UniPoseCost2Functor {
 
         T relative_quaternion[4];
         T relative_transition[3];
-        T casted_weight = (T) weight_;
+        T casted_rotation_weight = (T) rotation_weight_;
+        T casted_transition_weight = (T) transition_weight_;
 
         for(int i = 0; i < 4; i++) {
             relative_quaternion[i] = (T) relative_quaternion_[i];
@@ -266,10 +274,10 @@ struct UniPoseCost2Functor {
                             
         // rotation error should be 1 or -1
         if(rotation_error > (T) 0.0) {
-            residual[0] = casted_weight * (rotation_error - (T) 1.0);
+            residual[0] = casted_rotation_weight * (rotation_error - (T) 1.0);
         }
         else {
-            residual[0] = casted_weight * (rotation_error + (T) 1.0);
+            residual[0] = casted_rotation_weight * (rotation_error + (T) 1.0);
         }
 
         T estimated_transition_2[3];
@@ -279,7 +287,7 @@ struct UniPoseCost2Functor {
         // transition residual
         for(int i = 0; i < 3; i++) {
             residual[1 + i] = (estimated_transition_2[i] - (object_pose_2[i + 4] - 
-                object_pose_1[i + 4])) * casted_weight;
+                object_pose_1[i + 4])) * casted_transition_weight;
         }
         return true;  
     };
@@ -288,7 +296,8 @@ private:
     const double* object_pose_2_;
     const double* relative_quaternion_;
     const double* relative_transition_;
-    double weight_;
+    double rotation_weight_;
+    double transition_weight_;
 };
 
 // Symmetric Pose Functor
@@ -299,9 +308,10 @@ struct DualSymmetricCostFunctor {
     In this senario, poses are all symmetric with z-axis
      */
     
-    DualSymmetricCostFunctor(const double* relative_pose, double weight)
+    DualSymmetricCostFunctor(const double* relative_pose, double weight_1, double weight_2)
     {
-        weight_ = weight;
+        rotation_weight_ = weight_1;
+        transition_weight_ = weight_2;
         relative_quaternion_ = relative_pose;
         relative_transition_ = (const double *) &relative_pose[4];
 
@@ -319,7 +329,8 @@ struct DualSymmetricCostFunctor {
         // cast to T
         T relative_quaternion[4];
         T relative_transition[3];
-        T casted_weight = (T) weight_;
+        T casted_rotation_weight = (T) rotation_weight_;
+        T casted_transition_weight = (T) transition_weight_;
 
         for(int i = 0; i < 4; i++) {
             relative_quaternion[i] = (T) relative_quaternion_[i];
@@ -343,8 +354,8 @@ struct DualSymmetricCostFunctor {
                               - estimated_rotation_2[2] * object_pose_2[0] 
                               - estimated_rotation_2[3] * object_pose_2[1]);
 
-        residual[0] = casted_weight * rotation_error_x;
-        residual[1] = casted_weight * rotation_error_y;
+        residual[0] = casted_rotation_weight * rotation_error_x;
+        residual[1] = casted_rotation_weight * rotation_error_y;
 
         T estimated_transition_2[3];
         ceres::QuaternionRotatePoint(object_pose_1, relative_transition, 
@@ -353,7 +364,7 @@ struct DualSymmetricCostFunctor {
         // transition residual
         for(int i = 0; i < 3; i++) {
             residual[2 + i] = (estimated_transition_2[i] - (object_pose_2[i + 4] - 
-                object_pose_1[i + 4])) * casted_weight;
+                object_pose_1[i + 4])) * casted_transition_weight;
         }  
         return true;
     };
@@ -361,7 +372,8 @@ struct DualSymmetricCostFunctor {
 private:
     const double* relative_quaternion_;
     const double* relative_transition_;
-    double weight_;
+    double rotation_weight_;
+    double transition_weight_;
 };
 
 struct UniSymmetricCostFunctor {
@@ -372,11 +384,12 @@ struct UniSymmetricCostFunctor {
      */
     
     UniSymmetricCostFunctor(const double* object_pose_1, 
-                            const double* relative_pose, double weight)
+                            const double* relative_pose, double weight_1, double weight_2)
     {
         object_pose_1_ = object_pose_1;
         relative_quaternion_ = relative_pose;
-        weight_ = weight;
+        rotation_weight_ = weight_1;
+        transition_weight_ = weight_2;
         relative_transition_ = (const double *) &relative_pose[4];
     };
 
@@ -398,7 +411,8 @@ struct UniSymmetricCostFunctor {
 
         T relative_quaternion[4];
         T relative_transition[3];
-        T casted_weight = (T) weight_;
+        T casted_rotation_weight = (T) rotation_weight_;
+        T casted_transition_weight = (T) transition_weight_;
 
         for(int i = 0; i < 4; i++) {
             relative_quaternion[i] = (T) relative_quaternion_[i];
@@ -422,8 +436,8 @@ struct UniSymmetricCostFunctor {
                               - estimated_rotation_2[2] * object_pose_2[0] 
                               - estimated_rotation_2[3] * object_pose_2[1]);
 
-        residual[0] = casted_weight * rotation_error_x;
-        residual[1] = casted_weight * rotation_error_y;
+        residual[0] = casted_rotation_weight * rotation_error_x;
+        residual[1] = casted_rotation_weight * rotation_error_y;
 
         T estimated_transition_2[3];
         ceres::QuaternionRotatePoint(object_pose_1, relative_transition, 
@@ -432,7 +446,7 @@ struct UniSymmetricCostFunctor {
         // transition residual
         for(int i = 0; i < 3; i++) {
             residual[2 + i] = (estimated_transition_2[i] - (object_pose_2[i + 4] - 
-                object_pose_1[i + 4])) * casted_weight;
+                object_pose_1[i + 4])) * casted_transition_weight;
         }  
         return true;
     };
@@ -441,7 +455,8 @@ private:
     const double* object_pose_1_;
     const double* relative_quaternion_;
     const double* relative_transition_;
-    double weight_;
+    double rotation_weight_;
+    double transition_weight_;
 };
 
 struct UniSymmetricCost2Functor {
@@ -452,11 +467,12 @@ struct UniSymmetricCost2Functor {
      */
     
     UniSymmetricCost2Functor(const double* object_pose_2, 
-                            const double* relative_pose, double weight)
+                            const double* relative_pose, double weight_1, double weight_2)
     {
         object_pose_2_ = object_pose_2;
         relative_quaternion_ = relative_pose;
-        weight_ = weight;
+        rotation_weight_ = weight_1;
+        transition_weight_ = weight_2;
         relative_transition_ = (const double *) &relative_pose[4];
     };
 
@@ -478,7 +494,8 @@ struct UniSymmetricCost2Functor {
 
         T relative_quaternion[4];
         T relative_transition[3];
-        T casted_weight = (T) weight_;
+        T casted_rotation_weight = (T) rotation_weight_;
+        T casted_transition_weight = (T) transition_weight_;
 
         for(int i = 0; i < 4; i++) {
             relative_quaternion[i] = (T) relative_quaternion_[i];
@@ -502,8 +519,8 @@ struct UniSymmetricCost2Functor {
                               - estimated_rotation_2[2] * object_pose_2[0] 
                               - estimated_rotation_2[3] * object_pose_2[1]);
 
-        residual[0] = casted_weight * rotation_error_x;
-        residual[1] = casted_weight * rotation_error_y;
+        residual[0] = casted_rotation_weight * rotation_error_x;
+        residual[1] = casted_rotation_weight * rotation_error_y;
 
         T estimated_transition_2[3];
         ceres::QuaternionRotatePoint(object_pose_1, relative_transition, 
@@ -512,7 +529,7 @@ struct UniSymmetricCost2Functor {
         // transition residual
         for(int i = 0; i < 3; i++) {
             residual[2 + i] = (estimated_transition_2[i] - (object_pose_2[i + 4] - 
-                object_pose_1[i + 4])) * casted_weight;
+                object_pose_1[i + 4])) * casted_transition_weight;
         }  
         return true;
     };
@@ -521,7 +538,8 @@ private:
     const double* object_pose_2_;
     const double* relative_quaternion_;
     const double* relative_transition_;
-    double weight_;
+    double rotation_weight_;
+    double transition_weight_;
 };
 
 // Geometry Functors Version1
@@ -1106,16 +1124,22 @@ private:
 
 // TODO: Functions
 // Parameterization : Dim [7]
-ceres::CostFunction* DualPoseCost(const double* relative_pose, double weight);
+ceres::CostFunction* DualPoseCost(const double* relative_pose, 
+                                  double weight_1, double weight_2);
 ceres::CostFunction* UniPoseCost(const double* object_pose_1,
-                                 const double* relative_pose, double weight);
+                                 const double* relative_pose,
+                                 double weight_1, double weight_2);
 ceres::CostFunction* UniPoseCost2(const double* object_pose_1,
-                                 const double* relative_pose, double weight);
-ceres::CostFunction* DualSymmetricCost(const double* relative_pose, double weight);
+                                 const double* relative_pose,
+                                 double weight_1, double weight_2);
+ceres::CostFunction* DualSymmetricCost(const double* relative_pose,
+                                       double weight_1, double weight_2);
 ceres::CostFunction* UniSymmetricCost(const double* object_pose_1,
-                                      const double* relative_pose, double weight);
+                                      const double* relative_pose,
+                                      double weight_1, double weight_2);
 ceres::CostFunction* UniSymmetricCost2(const double* object_pose_1,
-                                       const double* relative_pose, double weight);
+                                       const double* relative_pose,
+                                       double weight_1, double weight_2);
 
 // Geometry constraints
 // Plane2Plane
