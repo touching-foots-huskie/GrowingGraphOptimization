@@ -45,6 +45,16 @@ ceres::CostFunction* UniSymmetricCost2(const double* object_pose_2,
     return cost_function;
 };
 
+// An Uni Cost
+ceres::CostFunction* MoveDepressCost(const double* select_frame,
+                                     const double* estimate_pose,
+                                     double weight_1,
+                                     double weight_2) {
+    ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<MoveDepressFunctor,
+        3, 7>(new MoveDepressFunctor(select_frame, estimate_pose, weight_1, weight_2));
+    return cost_function;
+};
+
 // Geometry Relationship
 ceres::CostFunction* DualPlane2PlaneCost(const double* normal_1, 
                                          const double* center_1,

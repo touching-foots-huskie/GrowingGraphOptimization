@@ -32,6 +32,7 @@ void QuatRelPose(const T* t1, const T* t2, T* t12) {
         inverse_rotation[i] = -t1[i];
     }
     ceres::QuaternionProduct(inverse_rotation, t2, t12);
+
     T transition2to1[3];
     for(int i = 0; i < 3; i++) {
         transition2to1[i] = t2[4 + i] - t1[4 + i];
@@ -542,6 +543,66 @@ private:
     double transition_weight_;
 };
 
+// Restriction the move in a plane & rotation with an axis
+struct MoveDepressFunctor {
+    MoveDepressFunctor(
+        const double* select_frame,
+        const double* estimate_pose,
+        double weight_1,
+        double weight_2) : 
+        select_frame_(select_frame), 
+        estimate_pose_(estimate_pose),
+        rotation_weight_(weight_1),
+        transition_weight_(weight_2)
+    {}
+    template<typename T>
+    bool operator() (const T* object_pose, T* residual) const {
+        // casted
+        T casted_rotation_weight = (T) rotation_weight_;
+        T casted_transition_weight = (T) transition_weight_;
+        T e_pose[7];
+        T s_pose[7];
+        for(int i = 0; i < 7; i++) {
+            e_pose[i] = (T) estimate_pose_[i];
+            s_pose[i] = (T) select_frame_[i];
+        }
+        // transform the pose into select_frame
+        T object_pose_in_frame[7];
+        T e_pose_in_frame[7];
+        QuatPoseCompose(s_pose, object_pose, object_pose_in_frame);
+        QuatPoseCompose(s_pose, e_pose, e_pose_in_frame);
+        // get global relative pose first
+        T rel_pose[7];
+        // inverse for q1
+        T inverse_e_pose[7];
+        inverse_e_pose[0] = e_pose_in_frame[0];
+        for(int i = 1; i < 4; i++) {
+            inverse_e_pose[i] = - e_pose_in_frame[i];
+        }
+        T pre_inverse_transition[3];
+        for(int i = 0; i < 3; i++) {
+            pre_inverse_transition[i] = - e_pose_in_frame[i + 4];
+        }
+        ceres::QuaternionRotatePoint(inverse_e_pose, pre_inverse_transition,
+            &inverse_e_pose[4]);
+        // q2q1-1
+        // inverse rotation
+        QuatPoseCompose(object_pose_in_frame, inverse_e_pose, rel_pose);
+        // get the cost
+        // depress rotation along z-axis
+        residual[0] = casted_rotation_weight * rel_pose[3];
+        // depress transition along x & y
+        residual[1] = casted_transition_weight * rel_pose[4];
+        residual[2] = casted_transition_weight * rel_pose[5];
+        return true;
+    };
+
+private: 
+    const double* select_frame_;  // precisely, this is the inverse transform
+    const double* estimate_pose_;
+    double rotation_weight_;
+    double transition_weight_;
+};
 // Geometry Functors Version1
 struct DualPlane2PlaneFunctor {
     DualPlane2PlaneFunctor(const double* normal_1, 
@@ -1141,6 +1202,10 @@ ceres::CostFunction* UniSymmetricCost2(const double* object_pose_1,
                                        const double* relative_pose,
                                        double weight_1, double weight_2);
 
+ceres::CostFunction* MoveDepressCost(const double* select_frame,
+                                     const double* estimate_pose,
+                                     double weight_1,
+                                     double weight_2);
 // Geometry constraints
 // Plane2Plane
 ceres::CostFunction* DualPlane2PlaneCost(const double* normal_1, 

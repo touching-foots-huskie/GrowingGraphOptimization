@@ -51,10 +51,37 @@ int main () {
     }
     std::cout << std::endl;
 
-    ceres::CostFunction* dual_pose_cost = UniSymmetricCost(quat_object_pose_1, relative_pose, 1.0, 1.0);
-    graph_optimizer.AddUniEdge(2, 1, dual_pose_cost, new ceres::TrivialLoss());
+    double Id_pose[7];
+    Eigen::MatrixXd Id_matrix = Eigen::MatrixXd(4, 4);
+    Id_matrix << std::sqrt(2) / 2.0, std::sqrt(2) / 2.0, 0, -0.3, 
+                - std::sqrt(2) / 2.0, std::sqrt(2) / 2.0, 0, -1.0,
+                0, 0, 1, -1.2,
+                0, 0, 0, 1;
+    GraphOptimizer::Matrix2Quaternion(Id_matrix, Id_pose);
+
+    ceres::CostFunction* dual_pose_cost = MoveDepressCost(Id_pose, quat_object_pose_1, 1.0, 1.0);
+    graph_optimizer.AddUniEdge(1, 1, dual_pose_cost, new ceres::TrivialLoss());
+
+    // Residual output
+    std::map<std::pair<int, int>, std::vector<double> > residual_by_pair;
+    graph_optimizer.Log(residual_by_pair);
+    std::cout << "-------- Before Updating ------" << std::endl;
+    for(auto it = residual_by_pair.begin(); it != residual_by_pair.end(); ++it) {
+        for(auto residual : it->second) {
+            std::cout << residual << ", ";
+        }
+        std::cout << "-----------" << std::endl;
+    }
+    //
     graph_optimizer.Optimization();
 
+    std::cout << "-------- After Updating ------" << std::endl;
+    for(auto it = residual_by_pair.begin(); it != residual_by_pair.end(); ++it) {
+        for(auto residual : it->second) {
+            std::cout << residual << ", ";
+        }
+        std::cout << "-----------" << std::endl;
+    }
     // Output Result
     std::map<int, Eigen::MatrixXd> output_values;
     graph_optimizer.ResultOutput(output_values);
