@@ -330,9 +330,26 @@ void GraphOptimizer::PoseDistance(const Eigen::Ref<Eigen::MatrixXd>& pose_1,
                                   const Eigen::Ref<Eigen::MatrixXd>& inner_transform,
                                   std::vector<double>& distance_vector,
                                   int symmetric_axis) {
-    Eigen::MatrixXd relative_pose = pose_1.inverse() * pose_2;
+    Eigen::Matrix4d pose_1_fixed;
+
+    for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
+            pose_1_fixed(i, j) = pose_1(i, j);
+        }
+    }
+
+    Eigen::Matrix4d inner_transform_fixed;
+
+    for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
+            inner_transform_fixed(i, j) = inner_transform(i, j);
+        }
+    }
+                                    
+    Eigen::MatrixXd relative_pose = pose_1_fixed.inverse() * pose_2;
+
     Eigen::MatrixXd transformed_rel_pose = 
-        inner_transform.inverse() * relative_pose * inner_transform;
+        inner_transform_fixed.inverse() * relative_pose * inner_transform;
     // Transform into quaternion
     double rel_pose[7];
     GraphOptimizer::Matrix2Quaternion(relative_pose, rel_pose);
